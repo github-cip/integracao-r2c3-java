@@ -81,7 +81,7 @@ public class Utils {
 	}
 
 	public static boolean isSignatureValid(String detachedJws, String body) throws CertificateException, java.text.ParseException, IOException {
-		final String cipCertificate = IOUtils.readInputStreamToString(Utils.class.getClassLoader().getResourceAsStream("cip_pub.cer"));
+		final String cipCertificate = IOUtils.readInputStreamToString(Utils.class.getClassLoader().getResourceAsStream("cip.cer"));
 		
 		final PublicKey PUBLIC_KEY = X509CertUtils.parse(cipCertificate).getPublicKey();
 		try {
@@ -102,11 +102,11 @@ public class Utils {
 			throws JOSEException, IOException, CertificateEncodingException, NoSuchAlgorithmException {
 		ClassLoader classLoader = Utils.class.getClassLoader();
 		
-		final String privateKey = IOUtils.readInputStreamToString(classLoader.getResourceAsStream("participante_priv.pem"));
-		final X509Certificate certificate = X509CertUtils.parse(IOUtils.readInputStreamToString(classLoader.getResourceAsStream("participante_pub.cer")));
+		final String privateKey = IOUtils.readInputStreamToString(classLoader.getResourceAsStream("87654321_priv_decrypted.pem"));
+		final X509Certificate certificate = X509CertUtils.parse(IOUtils.readInputStreamToString(classLoader.getResourceAsStream("87654321.cer")));
 		
 		final String certificateThumbPrint256 = getThumbprint(certificate);
-		final String certificateSerialHex = StringUtils.leftPad(certificate.getSerialNumber().toString(16), 40, '0');
+		final String certificateSerialHex = StringUtils.leftPad(certificate.getSerialNumber().toString(16), 32, '0');
 		final String dataReferencia = "2021-03-17";
 		final String ispbPrincipal = "87654321";
 		final String ispbAdministrado = "87654321";
