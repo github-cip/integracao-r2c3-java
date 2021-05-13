@@ -16,6 +16,35 @@ Esse repositório possui exemplos de integração com o sistema R2C3 utilizando 
 
 ## Segurança
 
+### Geração de certificados tipo servidor ICP-Brasil
+
+O exemplo abaixo é útil para geração de certificados a serem utilizados em tempo de desenvolvimento e testes:
+
+_Gera o certificado e sua chave privada:_
+
+```
+openssl req -days 3650 \
+	-keyout 87654321_priv_encrypted.pem \
+	-newkey rsa:2048 \
+	-out 87654321.cer \
+	-passout pass:pass123 \
+	-set_serial 0x`(openssl rand -hex 16)` \
+	-subj "/C=BR/O=ICP-Brasil/OU=RRC T001/OU=87654321/CN=participante87654321.com.br" \
+	-x509
+```
+
+_Descriptografa a chave privada gerada do comando anterior:_
+
+```
+openssl pkcs8 -in ./87654321_priv_encrypted.pem \
+	-nocrypt \
+	-out ./87654321_priv_decrypted.pem \
+	-passin pass:pass123 \
+	-topk8
+```
+
+Para todos os detalhes a respeito da especificação dos certificados consulte o manual de integração e segurança.
+
 ### Assinatura da Requisição
 
 O padrão da assinatura digital  para API REST é o JWS (JSON Web Signature). Seguem alguns detalhes:
@@ -90,8 +119,8 @@ $ mvn clean compile exec:java -Dexec.mainClass="br.org.cip.howto_r2c3_api_rest.A
 A saída deverá ser:
 
 ```
-Http Get Request - Sucesso: {"msg":"oi"}
-Http Post Request - Sucesso: {"msg":"oi"}
+Http Get Request - Sucesso: {​"msg":"teste"}​
+Http Post Request - Sucesso: {"identdCtrlReqSolicte":"1234567890123456789","identdCtrlOptIn":"2021031700015837456","cnpjER":"29011780000157"}
 ```
 
 ### Detalhes
@@ -110,7 +139,7 @@ String certificateThumbPrint256 = "ZmE2MThkMjAyMWU0ZDI1NWRkY2FkYWIzODcwMDM1YzcwO
 String certificateSerialHex = "507e166079a8eb93";
 
 String dataReferencia = new Date().toString();
-String ispbPrincipal = "sender";
+String ispbPrincipal = "87654321";
 String ispbAdministrado = "87654321";
 String identificadorRequisicao = "sender111111111234567"
 
@@ -151,12 +180,22 @@ try (Response response = client.newCall(request).execute()) {
 ```
 final String HOST = "https://apihext.cipr2c3.org.br";
 
-final String JSON = "{ \"identdConjUniddRecbvl\": \"233\" }";
+final String JSON = "{"
+					+ "\"identdCtrlReqSolicte\": \"1234567890123456789\","
+					+ "\"cnpjOuCnpjBaseOuCpfUsuFinalRecbdrOuTitlar\": \"37858576000102\","
+					+ "\"cnpjCreddrSub\": \"90917560000106\","
+					+ "\"cnpjFincdr\": \"07615100000171\","
+					+ "\"codInstitdrArrajPgto\": \"046\","
+					+ "\"dtOptIn\": \"2021-03-17\","
+					+ "\"dtIniOptIn\": \"2021-03-17\","
+					+ "\"dtFimOptIn\": \"2022-03-17\","
+					+ "\"indrDomcl\": \"N\""
+					+ "}";
 
 RequestBody body = RequestBody.create(JSON, MediaType.get("application/json; charset=utf-8"));
 
   Request request = new Request.Builder()
-      .url(HOST + "/v1/financiadora/conjuntos-unidades-recebiveis")
+      .url(HOST + "/api/v1/anuencias")
       .addHeader("x-jws-signature", jws) //jws foi gerado anteriormente
       .post(body)
       .build();
